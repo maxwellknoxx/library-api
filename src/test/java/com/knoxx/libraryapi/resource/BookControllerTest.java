@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knoxx.libraryapi.api.dto.BookDTO;
 import com.knoxx.libraryapi.api.resource.BookController;
 import com.knoxx.libraryapi.api.service.BookService;
+import com.knoxx.libraryapi.api.service.LoanService;
 import com.knoxx.libraryapi.entity.Book;
 import com.knoxx.libraryapi.exception.BusinessException;
 
@@ -45,6 +46,9 @@ public class BookControllerTest {
  
 	@MockBean
 	BookService service;
+	
+	@MockBean
+	LoanService loanService;
 
 	@Test
 	@DisplayName("Should create a new book successfully - Controller")
