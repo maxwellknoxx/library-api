@@ -28,8 +28,16 @@ import com.knoxx.libraryapi.api.service.LoanService;
 import com.knoxx.libraryapi.entity.Book;
 import com.knoxx.libraryapi.entity.Loan;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 @RequestMapping("/api/books")
+@Api("Book API")
+@Slf4j
 public class BookController {
 
 	BookService service;
@@ -47,6 +55,7 @@ public class BookController {
 	
 
 	@GetMapping
+	@ApiOperation("Finds a book by paramters")
 	public Page<BookDTO> find(BookDTO dto, Pageable pageRequest) {
 		Book filter = modelMapper.map(dto, Book.class);
 
@@ -59,13 +68,17 @@ public class BookController {
 	}
 
 	@GetMapping("{id}")
+	@ApiOperation("Gets a book details by id")
 	public BookDTO get(@PathVariable Long id) {
+		log.info("Getting details for book id {}", id);
 		return service.getById(id).map(book -> modelMapper.map(book, BookDTO.class))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 	}
 
 	@PutMapping("{id}")
+	@ApiOperation("Updates a book by id")
 	public BookDTO updateBook(@PathVariable Long id, BookDTO dto) {
+		log.info("Updating book id {}", id);
 		return service.getById(id).map(book -> {
 			book.setAuthor(dto.getAuthor());
 			book.setTitle(book.getTitle());
@@ -77,14 +90,21 @@ public class BookController {
 
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@ApiOperation("Deletes a book by id")
+	@ApiResponses({
+		@ApiResponse(code = 204, message = "Book succesfully deleted")
+	})
 	public void delete(@PathVariable Long id) {
+		log.info("Deleting book id {}", id);
 		Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		service.delete(book);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@ApiOperation("Creates a book")
 	public BookDTO create(@RequestBody @Valid BookDTO dto) {
+		log.info("creating a book for isbn {}", dto.getISBN());
 		Book entity = modelMapper.map(dto, Book.class);
 		entity = service.save(entity);
 		return modelMapper.map(entity, BookDTO.class);
@@ -93,6 +113,7 @@ public class BookController {
 	
 	
 	@GetMapping("{id}/loans")
+	@ApiOperation("Gets all loans from a book")
 	public Page<LoanDTO> loansByBook(@PathVariable Long id, Pageable pageable){
 		Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		Page<Loan> result = loanService.getLoansByBook(book, pageable);
